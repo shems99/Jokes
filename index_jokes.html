@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Jokes</title>
+    <link href="https://fonts.googleapis.com/css2?family=Staatliches&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Staatliches', sans-serif;
+            background-color: #111;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            color: #ff0066;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        #joke {
+            font-size: 1.5rem;
+            line-height: 1.6;
+            margin: 20px;
+            padding: 20px;
+            background: #222;
+            color: #fff;
+            border-left: 5px solid #ff0066;
+            text-shadow: 1px 1px 0 #000;
+            border-radius: 10px;
+        }
+
+        #punchline {
+            font-size: 1.5rem;
+            margin: 10px 0;
+            padding: 20px;
+            background: #333;
+            color: #00ff66;
+            border-left: 5px solid #00ff66;
+            text-shadow: 1px 1px 0 #000;
+            border-radius: 10px;
+            display: none; /* Hidden by default */
+        }
+
+        .btn {
+            background: #ff0066;
+            border: none;
+            color: #fff;
+            padding: 15px 30px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            margin-top: 20px;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 0 #000;
+            border-radius: 5px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: scale(1.1);
+            box-shadow: 4px 4px 0 #000;
+        }
+
+        .btn:active {
+            transform: scale(1.05);
+            box-shadow: 2px 2px 0 #000;
+        }
+    </style>
+</head>
+<body>
+    <h1>Random Joke</h1>
+    <div id="joke">Click the button to fetch a joke!</div>
+    <div id="punchline"></div>
+    <button class="btn" id="fetchJokeBtn" onclick="fetchJoke()">Get a Joke</button>
+    <button class="btn" id="revealBtn" style="display: none;" onclick="revealPunchline()">Reveal Punchline</button>
+
+    <script>
+        let currentPunchline = "";
+
+        // Function to fetch a joke from the API
+        async function fetchJoke() {
+            const jokeElement = document.getElementById('joke');
+            const punchlineElement = document.getElementById('punchline');
+            const revealBtn = document.getElementById('revealBtn');
+
+            // Reset punchline and button visibility
+            punchlineElement.style.display = "none";
+            revealBtn.style.display = "none";
+            jokeElement.textContent = "Loading..."; // Show loading text while fetching the joke
+
+            try {
+                const response = await fetch("https://v2.jokeapi.dev/joke/dark,pun,misc");
+                const jokeData = await response.json();
+
+                if (jokeData.type === "single") {
+                    // Single part joke
+                    jokeElement.textContent = jokeData.joke;
+                    currentPunchline = ""; // No punchline for single-part jokes
+                } else {
+                    // Two-part joke
+                    jokeElement.textContent = jokeData.setup;
+                    currentPunchline = jokeData.delivery; // Store the punchline
+                    revealBtn.style.display = "inline-block"; // Show the reveal button
+                }
+            } catch (error) {
+                jokeElement.textContent = "Oops! Something went wrong. Please try again.";
+                console.error("Error fetching joke:", error);
+            }
+        }
+
+        // Function to reveal the punchline
+        function revealPunchline() {
+            const punchlineElement = document.getElementById('punchline');
+            punchlineElement.textContent = currentPunchline;
+            punchlineElement.style.display = "block"; // Show the punchline
+        }
+    </script>
+</body>
+</html>
+
