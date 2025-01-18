@@ -3,6 +3,244 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeopardy Game for Dustin</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #000;
+            color: #fff;
+            margin: 0;
+            padding: 0;
+            background-image: url('https://images.unsplash.com/photo-1517356806535-6ef9bb06f51b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMTc3M3wwfDF8c2VhcmNofDd8fGNvbmZldGV8ZW58MHx8fHwxNjcwNjAxNTI3&ixlib=rb-1.2.1&q=80&w=1080');
+            background-size: cover;
+            background-attachment: fixed;
+        }
+        h1 {
+            margin-top: 20px;
+            color: #ffd700;
+            font-size: 3rem;
+            text-shadow: 2px 2px 5px #000;
+            animation: glow 2s infinite alternate;
+        }
+        @keyframes glow {
+            0% { text-shadow: 2px 2px 5px #000; }
+            100% { text-shadow: 2px 2px 20px #ffd700; }
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            width: 90%;
+            margin: 20px auto;
+            backdrop-filter: blur(5px);
+        }
+        .column-names {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            width: 90%;
+            margin: 10px auto;
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 1px 1px 5px #000;
+        }
+        .card {
+            background: linear-gradient(135deg, #800080, #4b0082);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 150px;
+            box-shadow: 0 4px 8px rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s, background 0.3s;
+            border: 2px solid #ffd700;
+        }
+        .card:hover {
+            background: linear-gradient(135deg, #000, #4b0082);
+            color: #ffd700;
+            transform: scale(1.1);
+        }
+        .fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            color: #ffd700;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .fullscreen .question {
+            font-size: 36px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .fullscreen .options {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .fullscreen .options button {
+            padding: 10px 20px;
+            font-size: 20px;
+            background: linear-gradient(135deg, #800080, #4b0082);
+            color: white;
+            border: 2px solid #ffd700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .fullscreen .options button:hover {
+            background: #ffd700;
+            color: #000;
+            transform: scale(1.1);
+        }
+        .fullscreen .answer {
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 5px #000;
+        }
+        .fullscreen .buttons {
+            display: flex;
+            gap: 20px;
+        }
+        .fullscreen .buttons button {
+            padding: 10px 20px;
+            font-size: 20px;
+            background: linear-gradient(135deg, #800080, #4b0082);
+            color: white;
+            border: 2px solid #ffd700;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .fullscreen .buttons button:hover {
+            background: #ffd700;
+            color: #000;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>Dustin's Jeopardy Game</h1>
+    <div class="column-names">
+        <div>Childhood Antics</div>
+        <div>High School Memories</div>
+        <div>Embarrassing Moments</div>
+        <div>Favorites and Habits</div>
+    </div>
+    <div class="grid" id="gameBoard">
+        <!-- Cards will be dynamically added here -->
+    </div>
+
+    <script>
+        const facts = [
+            { question: "Why did Dustin break into a home while a whole family was asleep when he was a kid?", answer: "He wanted to see all their Christmas gifts", options: ["He wanted to get with their daughter", "He wanted to get with their son", "He wanted to see all their Christmas gifts", "Dad came home from a night of drinking and started swinging"] },
+            { question: "What was the name of the car that smoked and looked like it was on fire because of the oil leaks in high school?", answer: "Rolling Blunt", options: ["Rolling Thunder", "Fireball", "Rolling Blunt", "Oil Monster"] },
+            { question: "What is one of the most embarrassing things Dustin has ever said?", answer: "Let’s gang bang her!", options: ["Let’s gang bang her!", "I’m the king!", "Bring it on!", "I’m invincible!"] },
+            { question: "What is Dustin’s go-to show?", answer: "Family Guy", options: ["The Office", "Parks and Recreation", "Family Guy", "Breaking Bad"] },
+            { question: "Dustin’s Secretary had to remind him to do what?", answer: "Take his girl on dates", options: ["Go to more meetings", "Take his girl on dates", "Pay his bills", "Feed his dog"] },
+            { question: "What city did Dustin go to on his mission in South Africa?", answer: "Johannesburg", options: ["Durban", "Cape Town", "Johannesburg", "Pretoria"] },
+            { question: "What sickness did Dustin get from Chase after tampering with his pillow?", answer: "Pink eye after he ripped ass into it", options: ["The flu from coughing on it", "Pink eye from farting on it", "A cold from sneezing on it", "Pregnant from ejaculating on it"] },
+            { question: "Where does Dustin go to relax every day?", answer: "The shower for like 2 hours", options: ["The gym", "The park", "The shower for like 2 hours", "Gay Bar"] },
+            { question: "Who is Dustin’s favorite superhero?", answer: "Superman", options: ["Superman", "Batman", "Spider-Man", "Iron Man"] },
+            { question: "What did everyone think Dustin was the first 2 months of freshman year?", answer: "Retarded", options: ["Shy", "Retarded", "Lazy", "Genius"] },
+            { question: "What height did Dustin put on his Mutual date profile even though he’s only 5ft 9?", answer: "6 ft", options: ["5'9\"", "5'11\"", "6 ft", "6'2\""] },
+            { question: "Where is Dustin’s go-to for shopping?", answer: "Walmart", options: ["Target", "Amazon", "Walmart", "Costco"] },
+            { question: "What substance did Dustin have on the back of his shirt at school?", answer: "Snot after Chase blew his nose into it", options: ["Dirt", "Snot", "Food stains", "Paint"] },
+            { question: "What was Dustin’s High school nickname?", answer: "Mouse", options: ["Mouse", "Moose", "Speedy", "Dumbo"] },
+            { question: "What race was Dustin’s first experience with a dancer in Vegas?", answer: "Black", options: ["Black", "White", "Asian", "Hispanic"] },
+            { question: "Who is Dustin’s hall pass?", answer: "Selena Gomez", options: ["Selena Gomez", "Zendaya", "Ariana Grande", "Emma Watson"] }
+        ];
+        const gameBoard = document.getElementById('gameBoard');
+
+        facts.forEach((fact, index) => {
+            const card = document.createElement('div');
+            card.classList.add('card');
+            card.innerText = `${Math.floor(index / 4) * 100 + 100}`;
+
+            card.addEventListener('click', () => {
+                showFullscreen(fact);
+            });
+
+            gameBoard.appendChild(card);
+        });
+
+        function showFullscreen(fact) {
+            const fullscreenDiv = document.createElement('div');
+            fullscreenDiv.classList.add('fullscreen');
+
+            const questionDiv = document.createElement('div');
+            questionDiv.classList.add('question');
+            questionDiv.innerText = fact.question;
+
+            const optionsDiv = document.createElement('div');
+            optionsDiv.classList.add('options');
+            fact.options.forEach(option => {
+                const optionButton = document.createElement('button');
+                optionButton.innerText = option;
+                optionButton.addEventListener('click', () => {
+                    optionButton.style.backgroundColor = option === fact.answer ? '#32CD32' : '#FF4500';
+                });
+                optionsDiv.appendChild(optionButton);
+            });
+
+            const answerDiv = document.createElement('div');
+            answerDiv.classList.add('answer');
+            answerDiv.innerText = `Answer: ${fact.answer}`;
+            answerDiv.style.display = 'none';
+
+            const buttonsDiv = document.createElement('div');
+            buttonsDiv.classList.add('buttons');
+
+            const showAnswerButton = document.createElement('button');
+            showAnswerButton.innerText = "Show Answer";
+            showAnswerButton.addEventListener('click', () => {
+                answerDiv.style.display = 'block';
+            });
+
+            const backButton = document.createElement('button');
+            backButton.innerText = "Back";
+            backButton.addEventListener('click', () => {
+                fullscreenDiv.remove();
+            });
+
+            buttonsDiv.appendChild(showAnswerButton);
+            buttonsDiv.appendChild(backButton);
+
+            fullscreenDiv.appendChild(questionDiv);
+            fullscreenDiv.appendChild(optionsDiv);
+            fullscreenDiv.appendChild(answerDiv);
+            fullscreenDiv.appendChild(buttonsDiv);
+            document.body.appendChild(fullscreenDiv);
+        }
+    </script>
+</body>
+</html>
+
+
+
+<!--
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Random Jokes</title>
     <link href="https://fonts.googleapis.com/css2?family=Staatliches&display=swap" rel="stylesheet">
     <style>
@@ -132,4 +370,4 @@
     </script>
 </body>
 </html>
-
+-->
